@@ -72,6 +72,31 @@ public class ProductController {
         return productService.search(keyword);
     }
 
+    @GetMapping("/search/advanced")
+    public PageResponse<ProductResponse> advancedSearch(
+            @RequestParam
+            @NotBlank
+            @Size(max = 100)
+            String keyword,
+            @RequestParam(required = false)
+            @Size(max = 50)
+            String category,
+            @RequestParam(required = false)
+            @DecimalMin(value = "0.00")
+            BigDecimal minPrice,
+            @RequestParam(required = false)
+            @DecimalMin(value = "0.00")
+            BigDecimal maxPrice,
+            @PageableDefault(size = 20)
+            Pageable pageable) {
+        return PageResponse.from(productService.advancedSearch(
+                keyword,
+                category,
+                minPrice,
+                maxPrice,
+                pageable));
+    }
+
     @GetMapping("/price-above")
     public List<ProductResponse> listByMinimumPrice(
             @RequestParam

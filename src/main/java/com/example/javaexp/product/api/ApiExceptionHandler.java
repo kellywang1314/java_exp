@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.example.javaexp.product.service.InvalidSearchCriteriaException;
 import com.example.javaexp.product.service.ProductNotFoundException;
 
 @RestControllerAdvice
@@ -23,6 +24,17 @@ public class ApiExceptionHandler {
                 .body(new ApiError(
                         Instant.now(),
                         HttpStatus.NOT_FOUND.value(),
+                        exception.getMessage(),
+                        Map.of()));
+    }
+
+    @ExceptionHandler(InvalidSearchCriteriaException.class)
+    ResponseEntity<ApiError> handleInvalidSearchCriteria(
+            InvalidSearchCriteriaException exception) {
+        return ResponseEntity.badRequest()
+                .body(new ApiError(
+                        Instant.now(),
+                        HttpStatus.BAD_REQUEST.value(),
                         exception.getMessage(),
                         Map.of()));
     }

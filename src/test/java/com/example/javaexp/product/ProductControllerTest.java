@@ -119,6 +119,37 @@ class ProductControllerTest {
     }
 
     @Test
+    void performsAdvancedProductDiscovery() throws Exception {
+        createProduct("Discovery Budget Meal", "Group Meal", "68.00");
+        createProduct("Discovery Premium Meal", "Group Meal", "168.00");
+        createProduct("Discovery Spa Service", "Service", "128.00");
+
+        mockMvc.perform(get("/api/products/search/advanced")
+                        .param("keyword", "Discovery")
+                        .param("category", "Group Meal")
+                        .param("minPrice", "100.00")
+                        .param("maxPrice", "200.00")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .param("sort", "price,desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name").value("Discovery Premium Meal"))
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void rejectsInvalidAdvancedSearchPriceRange() throws Exception {
+        mockMvc.perform(get("/api/products/search/advanced")
+                        .param("keyword", "Discovery")
+                        .param("minPrice", "200.00")
+                        .param("maxPrice", "100.00"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("minPrice must be less than or equal to maxPrice"));
+    }
+
+    @Test
     void updatesCacheAndRemovesDeletedProduct() throws Exception {
         Long productId = createProduct("Original Meal", "88.00");
         ProductRequest updateRequest = new ProductRequest(
@@ -153,9 +184,13 @@ class ProductControllerTest {
     }
 
     private Long createProduct(String name, String price) throws Exception {
+        return createProduct(name, "Group Meal", price);
+    }
+
+    private Long createProduct(String name, String category, String price) throws Exception {
         ProductRequest request = new ProductRequest(
                 name,
-                "Group Meal",
+                category,
                 new BigDecimal(price),
                 name + " description");
 

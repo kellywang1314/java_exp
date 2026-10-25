@@ -16,6 +16,7 @@ import com.example.javaexp.product.api.ProductRequest;
 import com.example.javaexp.product.api.ProductResponse;
 import com.example.javaexp.product.model.Product;
 import com.example.javaexp.product.repository.ProductRepository;
+import com.example.javaexp.product.search.ProductSearchCriteria;
 import com.example.javaexp.product.search.ProductSearchGateway;
 
 @Service
@@ -78,6 +79,24 @@ public class ProductService {
 
     public List<ProductResponse> search(String keyword) {
         return productSearchGateway.search(keyword.trim());
+    }
+
+    public Page<ProductResponse> advancedSearch(
+            String keyword,
+            String category,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            Pageable pageable) {
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new InvalidSearchCriteriaException(
+                    "minPrice must be less than or equal to maxPrice");
+        }
+        ProductSearchCriteria criteria = new ProductSearchCriteria(
+                keyword.trim(),
+                category == null ? null : category.trim(),
+                minPrice,
+                maxPrice);
+        return productSearchGateway.advancedSearch(criteria, pageable);
     }
 
     @CachePut(cacheNames = "products", key = "#productId")

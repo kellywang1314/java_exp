@@ -78,6 +78,7 @@ HTTP Request
 | GET | `/api/products` | 查询列表，可传 `category` |
 | GET | `/api/products/page?page=0&size=10` | 分页、排序查询 |
 | GET | `/api/products/search?keyword=hotpot` | 内存或 ES 关键词搜索 |
+| GET | `/api/products/search/advanced?keyword=hotpot&category=Group%20Meal&minPrice=50&maxPrice=200&page=0&size=20&sort=price,asc` | ES 场景：全文搜索叠加过滤、分页和排序 |
 | GET | `/api/products/price-above?minPrice=100` | 原生 SQL 查询 |
 | PUT | `/api/products/{id}` | 更新商品并刷新缓存、索引 |
 | DELETE | `/api/products/{id}` | 删除商品并清理缓存、索引 |
@@ -99,6 +100,7 @@ curl -i -X POST http://127.0.0.1:8082/api/products \
 
 curl 'http://127.0.0.1:8082/api/products/page?page=0&size=10&sort=price,desc'
 curl 'http://127.0.0.1:8082/api/products/search?keyword=Hotpot'
+curl 'http://127.0.0.1:8082/api/products/search/advanced?keyword=Hotpot&category=Group%20Meal&minPrice=50&maxPrice=200&page=0&size=20&sort=price,asc'
 ```
 
 每个响应都包含 `X-Request-Id`，也可以由调用方传入该 Header，便于关联日志。
